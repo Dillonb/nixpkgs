@@ -123,9 +123,6 @@
   minimal ? toolsOnly || userOnly,
   gitUpdater,
   qemu-utils, # for tests attribute
-
-  # TODO: Clean up on `staging`.
-  llvmPackages,
 }:
 
 assert lib.assertMsg (
@@ -144,11 +141,11 @@ stdenv.mkDerivation (finalAttrs: {
     + lib.optionalString nixosTestRunner "-for-vm-tests"
     + lib.optionalString toolsOnly "-utils"
     + lib.optionalString userOnly "-user";
-  version = "11.0.1";
+  version = "11.0.2";
 
   src = fetchurl {
     url = "https://download.qemu.org/qemu-${finalAttrs.version}.tar.xz";
-    hash = "sha256-DSNfWCAnjZFKMVXsJ6+OQljWl+qJKJVXCAfWnAy4zWQ=";
+    hash = "sha256-N0X26oji6H/g3IOLKx1OCncL9I4BodWhhoQqH/92zPU=";
   };
 
   depsBuildBuild = [
@@ -183,9 +180,6 @@ stdenv.mkDerivation (finalAttrs: {
   ++ lib.optionals hexagonSupport [ glib ]
   ++ lib.optionals stdenv.hostPlatform.isDarwin [
     darwin.sigtool
-
-    # TODO: Clean up on `staging`.
-    llvmPackages.lld
   ]
   ++ lib.optionals (!userOnly) [ dtc ];
 
@@ -430,10 +424,6 @@ stdenv.mkDerivation (finalAttrs: {
   postInstall = lib.optionalString (!minimal && !xenSupport) ''
     ln -s $out/bin/qemu-system-${stdenv.hostPlatform.qemuArch} $out/bin/qemu-kvm
   '';
-
-  env = lib.optionalAttrs stdenv.hostPlatform.isDarwin {
-    NIX_CFLAGS_LINK = "-fuse-ld=lld";
-  };
 
   passthru = {
     qemu-system-i386 = "bin/qemu-system-i386";
